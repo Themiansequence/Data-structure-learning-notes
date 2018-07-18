@@ -1,0 +1,40 @@
+# Data-structure-learning-notes
+c++数据结构学习笔记
+class my{
+public:
+	    ~my(){cout<<"my"<<endl;};
+public:
+	int a;
+	double b;
+	char c;
+	double d;
+	int e;
+};
+
+class my1 :public my{
+public:
+	  ~my1(){cout<<"my1"<<endl;};
+
+public:
+	int f;
+	short g;
+};
+class my2 :public my1{
+public:
+	  ~my2(){cout<<"my2"<<endl;};
+
+public:
+	char h;
+};
+
+
+
+int main() {
+	cout<<sizeof(my1)<<endl;
+	cout<<sizeof(my2)<<endl;
+	return 0;
+}
+48
+48
+my2的对象先安排1个my1对象，再分配分配自己的成员h；递归的，my1的对象先安排my对象，再安排自己的f和g。
+尽量和父类拼凑最后一个字。
