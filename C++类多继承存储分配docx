@@ -1,0 +1,35 @@
+# Data-structure-learning-notes
+c++数据结构学习笔记
+class you{
+public:
+	  ~you(){cout<<"you"<<endl;};
+
+public:
+	int aa;
+	double bb;
+	char cc;
+};
+class my2 :public my1, public you{
+public:
+	  ~my2(){cout<<"my2"<<endl;};
+
+public:
+	char h;
+};
+int main() {
+	cout<<sizeof(my2)<<endl;
+	my2 abc;
+	printf("%p\n",&abc);
+	printf("%p\n",&abc.a);
+	printf("%p\n",&abc.aa);
+	printf("%p\n",&abc.h);
+	return 0;
+}
+72
+0x7fff52ff6608
+0x7fff52ff6608
+0x7fff52ff6638
+0x7fff52ff6649
+my2的对象中先安排my1对象，再安排you对象。you对象不和my1拼凑。
+
+my2自己的char h和you的最后1个字拼凑在一起。
