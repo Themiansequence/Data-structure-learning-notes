@@ -111,3 +111,155 @@ return 0;
 这时面临先my1或you的选择，因为you有虚拟函数，为了将vptr尽量安排在相对地址0，所以先安排you，再安排my1，最后安排h。
 继承多个父类时，编译器可以自由的安排次序。
 h都是49，说明先安排了my1再you。
+(3)
+class my{
+public:
+	    virtual ~my(){cout<<"my"<<endl;};
+public:
+	int a;
+	double b;
+	char c;
+	double d;
+	int e;
+};
+
+class my1 :public my{
+public:
+	  ~my1(){cout<<"my1"<<endl;};
+
+public:
+	int f;
+	short g;
+};
+class you{
+public:
+	 virtual ~you(){cout<<"you"<<endl;};
+
+public:
+	int aa;
+	double bb;
+	char cc;
+};
+class my2 :public my1, public you{
+public:
+	 ~my2(){cout<<"my2"<<endl;};
+
+public:
+	char h;
+};
+int main() {
+	my2 abc;
+	printf("%d\n", sizeof(my2));
+	printf("%p\n",&abc);
+	printf("%p\n",&abc.a);
+	printf("%p\n",&abc.f);
+	printf("%p\n",&abc.aa);
+	printf("%p\n",&abc.h);
+	printf("%p\n",&my2::h);
+	return 0;
+}
+88
+0x7fff5ebff5f8
+0x7fff5ebff600
+0x7fff5ebff624
+0x7fff5ebff638
+0x7fff5ebff649
+0x51
+在前例的基础上再让my引入虚函数。
+这时my2有2个父类，每个父类都有虚函数。
+所以，按照定义的次序，先安排my1，再安排you，最后，安排h。
+(4)
+class my{
+public:
+	    virtual ~my(){cout<<"my"<<endl;};
+public:
+	int a;
+	double b;
+	char c;
+	double d;
+	int e;
+};
+
+class my1 :public my{
+public:
+	  ~my1(){cout<<"my1"<<endl;};
+
+public:
+	int f;
+	short g;
+};
+class you{
+public:
+	 virtual ~you(){cout<<"you"<<endl;};
+
+public:
+	int aa;
+	double bb;
+	char cc;
+};
+class my2 :public my1, public you{
+public:
+	virtual ~my2(){cout<<"my2"<<endl;};
+
+public:
+	char h;
+};
+int main() {
+	my2 abc;
+	printf("%d\n", sizeof(my2));
+	printf("%p\n",&abc);
+	printf("%p\n",&abc.a);
+	printf("%p\n",&abc.f);
+	printf("%p\n",&abc.aa);
+	printf("%p\n",&abc.h);
+	printf("%p\n",&my2::h);
+	return 0;
+}
+88
+0x7fff5ebff5f8
+0x7fff5ebff600
+0x7fff5ebff624
+0x7fff5ebff638
+0x7fff5ebff649
+0x51
+
+在前例的基础上再让my2引入虚函数。
+这时my2有2个父类，每个父类都有虚函数，它自己也有虚函数。
+所以，按照定义的次序，先安排my1，再安排you，最后，安排h。这时my2与my1共用一个vptr
+(5)
+class you1{
+public:
+	  virtual ~you1(){cout<<"you"<<endl;};
+
+public:
+	int aa1;
+	double bb1;
+	char cc1;
+};
+
+class my2 : public my1, public you,public you1{
+public:
+	     ~my2(){cout<<"my2"<<endl;};
+public:
+	char h;
+};
+int main() {
+	my2 abc;
+	printf("%d\n", sizeof(my2));
+	printf("%p\n",&abc);
+	printf(“%p\n",&abc.a);
+	printf("%p\n",&abc.aa);
+	printf("%p\n",&abc.aa1);
+	printf("%p\n",&abc.h);
+	printf("%p\n",&my2::h);
+}
+120
+0x7fff5a3115d8
+0x7fff5a3115e0
+0x7fff5a311618
+0x7fff5a311638
+0x7fff5a311649
+0x71
+在前例的基础上再增加you1，并去掉my2的虚函数。
+这时my2有3个父类，每个父类都有虚函数。
+所以，按照定义的次序，先安排my1，再安排you，再you1，最后，安排h。
