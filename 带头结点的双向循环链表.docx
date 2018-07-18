@@ -1,0 +1,337 @@
+# Data-structure-learning-notes
+c++数据结构学习笔记
+c++代码
+linearList.h
+#include <iostream>
+#include <iterator>
+#include <algorithm>
+
+template <typename T>
+class linearList {
+public:
+	virtual ~linearList(){};
+	virtual bool empty() const = 0;
+				//返回true，当且仅当线性表为空
+	virtual int size() const = 0;
+				//返回true，当且仅当线性表为空
+	virtual T& get(int theIndex) const = 0;
+				//返回线性表的元素个数
+	virtual int indexOf(const T& theElement) const = 0;
+	//返回索引为theIndex的元素
+	virtual void erase(int theIndex) = 0;
+				//删除索引为theIndex的元素
+	virtual void insert(int theIndex, const T& theElement) = 0;
+				//把theElement插入线性表中索引为theIndex的位置上
+	virtual void output(std::ostream& out) const = 0;
+				//把线性表插入输出流out
+};
+doubleChain.h
+#include"linearList.h"
+template <typename T>
+struct chainNode
+{
+   T element;
+   chainNode<T> *left,*right;
+   chainNode() { left=NULL;right=NULL; }
+   chainNode( const T& element) {
+      this->elements=element;
+      left=NULL;right=NULL;
+    }
+    chainNode(const T& element, chainNode* left,chainNode* right)   {
+	   this->element = element;
+	   this->left = left;
+       this->right = right;
+   }
+};
+
+
+
+template<class T>
+class doubleChain : public linearList<T>
+{
+   public:
+	  doubleChain(int initialCapacity = 10);//Constructor构造函数
+	  doubleChain(const doubleChain&);//复制构造函数  可以将chain<T>简写为chain，因为这是在class chain的作用域内
+      ~doubleChain();//析构函数
+     bool empty() const {return listSize == 0;}//检查链表是否为空
+      int size() const {return listSize;}//获取链表内元素个数
+      T& get(int theIndex) const;//返回索引为theIndex的元素
+      int indexOf(const T& theElement) const;//返回元素theElement首次出现的索引
+      void erase(int theIndex);//删除索引为theIndex的元素
+      void insert(int theIndex, const T& theElement);//插入元素theElement并使其索引为theIndex
+      void output(std::ostream& out) const;//输出链表
+      void operator=(doubleChain&);
+
+
+	  class iterator;//迭代器，方便从任何一个元素移到它的后继和前驱
+	  iterator begin() const{return iterator(firstNode->right);}
+
+	  iterator end() const{return iterator(firstNode->left);}
+   public:
+      class iterator :public std::iterator<std::forward_iterator_tag,T>
+         {
+         public:
+
+
+                // constructor 构造函数
+                iterator(chainNode<T>* theNode = NULL)
+                   {node = theNode;}
+                // dereferencing operators解引用操作符
+                 T& operator*() const {return node->element;}
+                 T* operator->() const {return &node->element;}
+
+                 // equality testing 相等检验
+                 bool operator!=(const iterator right) const
+                       {return node != right.node;}
+                 bool operator==(const iterator right) const
+                       {return node == right.node;}
+                 // increment 迭代器加法操作
+                 iterator& operator++()   // preincrement 前加++i
+                           {node = node->right; return *this;}
+                 iterator operator++(int) // postincrement 后加i++
+                 	      {iterator old = *this;
+                 	       node = node->right;
+                 	       return old;
+                 	      }
+                 iterator& operator--()//前减--i
+                		 {node=node->left;return *this; }
+                 iterator operator--(int)//后减i--
+		                 {iterator old=*this;
+		                  node=node->left;
+		                  return old;}
+            protected:
+               chainNode<T>* node;
+         };  // end of iterator class
+
+
+
+      private:
+      void checkIndex(int theIndex) const;
+      chainNode<T>* firstNode;  // pointer to first node in chain
+      int listSize;             // number of elements in list
+
+
+};
+doubleChain.cpp
+#include <iostream>
+#include"doubleChain.h"
+using namespace std;
+
+template <typename T>
+doubleChain<T>::doubleChain(int n){
+	//构造函数
+	if(n < 1){
+		cout<<"错误"<<endl;
+		return;
+	}
+	firstNode = new chainNode<T>();
+	firstNode->right = firstNode;
+	firstNode->left = firstNode;
+	listSize = 0;
+}
+
+template<class T>
+doubleChain<T>::doubleChain(const doubleChain<T>& theList){
+	//复制构造函数
+	listSize=theList.listSize;
+
+	if(listSize == 0){
+		//链表theList为空
+		firstNode = new chainNode<T>();
+		firstNode->right = firstNode;
+		firstNode->left = firstNode;
+		listSize = 0;
+		return;
+	}
+
+	chainNode<T>* sourceNode = theList.firstNode->right;
+	//要复制链表theList的节点
+	firstNode = new chainNode<T>();
+	firstNode->right = new chainNode<T>(sourceNode->element);
+	//复制链表theList的首元素
+	firstNode->right->left = firstNode;//首节点和第二个节点之间的关系补充
+	sourceNode = sourceNode->right;
+	chainNode<T>* targetNode = firstNode->right;
+	//当前链表*this的最后一个节点
+	while(sourceNode != theList.firstNode){
+		//复制剩余元素
+		targetNode->right = new chainNode<T>(sourceNode->element);
+		targetNode->right->left = targetNode;
+		sourceNode = sourceNode->right;
+		targetNode = targetNode->right;
+	}
+	targetNode->right = firstNode;
+	firstNode->left = targetNode;
+	//循环链表
+}
+
+template<class T>
+doubleChain<T>::~doubleChain(){
+	//链表析构函数，删除链表的所有节点
+	while(firstNode->right != firstNode){
+		//删除第二个节点
+		chainNode<T>* nextNode = firstNode->right->right;
+		delete firstNode->right;
+		firstNode->right = nextNode;
+	}
+	delete firstNode;
+}
+
+
+template<class T>
+void doubleChain<T>::checkIndex(int theIndex) const{
+	//确定索引theIndex在1和listSize之间，因为首节点firstNode为空
+	if(theIndex <= 0 || theIndex > listSize){
+		cout<<"theIndex不符合要求";
+		return;
+	}
+}
+
+template <class T>
+T& doubleChain<T>::get(int theIndex) const{
+	//返回索引为theIndex的元素
+	//若该元素不存在，则给出提醒
+	checkIndex(theIndex);
+
+	//移向所需要的节点
+	chainNode<T> *currentNode = firstNode->right;
+	for(int i = 1;i < theIndex ;i++){
+		currentNode = currentNode->right;
+	}
+	return currentNode->element;
+}
+
+template <class T>
+int doubleChain<T>::indexOf(const T& theElement) const{
+	//返回元素theElement首次出现的索引
+	//若元素不存在，返回-1
+
+	//搜索链表寻找元素theElement
+	chainNode<T> *currentNode = firstNode->right;
+	int index = 0;
+	while(currentNode != firstNode && currentNode->element != theElement){
+		currentNode = currentNode->right;
+		index++;
+	}
+
+	//确定是否找到所需元素
+	if(currentNode == firstNode)
+		return -1;
+	else
+		return index;
+}
+
+template <typename T>
+void doubleChain<T>::erase(int theIndex){
+	//删除索引为theIndex的元素
+	//若元素不存在，则给出提醒
+	checkIndex(theIndex);
+
+	//索引有效，需找到删除的元素节点
+	chainNode<T> *deleteNode = firstNode;
+
+	for(int i = 0;i < theIndex;i++){
+		deleteNode = deleteNode->right;
+	}
+
+	deleteNode->left->right=deleteNode->right;
+	deleteNode->right->left=deleteNode->left;
+	//删除deleteNode指向的节点
+
+	delete deleteNode;
+	listSize--;
+
+}
+
+template <typename T>
+void doubleChain<T>::insert(int theIndex, const T& theElement){
+	//在索引为theIndex的位置上插入元素theElement
+	if(theIndex <= 0 || theIndex >listSize+1){
+		//无效索引
+		cout<<"theIndex不符合要求";
+		return;
+	}
+
+	//寻找新元素的前驱
+	chainNode<T> *p = firstNode;
+	chainNode<T> *q = new chainNode<T>(theElement);
+
+	for(int i = 0;i < theIndex-1;i++){
+		p = p->right;
+	}
+
+	q->right = p->right;
+	p->right->left = q;
+	p->right = q;
+	q->left = p;
+
+	listSize++;
+}
+
+
+
+template<class T>
+void doubleChain<T>::output(std::ostream& out) const{
+	//把链表放入输出流
+	/*for(doubleChainNode<T>* currentNode = firstNode->right;
+							currentNode != NULL;
+							currentNode = currentNode->right)
+		out<<currentNode->element<<"  ";*/
+   chainNode<T> *p = firstNode->right;
+      out <<std::endl;
+      while(p!=firstNode){
+   	   out << p->element <<" ";
+   	   p = p->right;
+      }
+      out << std::endl;
+
+}
+
+//重载<<
+template <class T>
+std::ostream& operator<<(std::ostream& out, const doubleChain<T>& x){
+	x.output(out);
+	return out;
+}
+test.cpp
+#include"doubleChain.cpp"
+int main(){
+
+	doubleChain<int> doubleChain(1);
+
+	//测试empty和size
+	cout<<"链表是否为空："<<doubleChain.empty()<<endl;
+	cout<<"链表内元素个数："<<doubleChain.size();
+
+	//测试insert
+	doubleChain.insert(1,2);
+	doubleChain.insert(2,6);
+	doubleChain.insert(3,8);
+	doubleChain.output(cout);
+
+	doubleChain.insert(2,4);
+	doubleChain.output(cout);
+
+	//无效的索引
+	doubleChain.insert(9,9);
+	doubleChain.output(cout);
+
+
+	//测试get,返回索引为theIndex的元素
+	cout<<"索引为1的元素为："<<doubleChain.get(1)<<endl;
+	//无效的索引
+	doubleChain.get(6);
+
+	//测试erase
+	doubleChain.erase(3);
+	doubleChain.output(cout);
+
+	//测试indexOf
+	cout<<"元素2的索引为："<<doubleChain.indexOf(2)<<endl;
+	//元素不存在
+	cout<<"元素1的索引为："<<doubleChain.indexOf(1);
+
+}
+
+
+Java代码
