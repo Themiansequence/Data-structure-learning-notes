@@ -1,0 +1,32 @@
+# Data-structure-learning-notes
+c++数据结构学习笔记
+class my{
+public:
+	   ~my(){cout<<"my"<<endl;};
+public:
+	int a;
+	double b;
+	char c;
+	double d;
+	int e;
+};
+int main() {
+	printf("%p\n", &my::a);
+	printf("%p\n", &my::b);
+	printf("%p\n", &my::c);
+	printf("%p\n", &my::d);
+	printf("%p\n", &my::e);
+	cout <<sizeof(my)<<endl;
+	return 0;
+}
+0x0
+0x8
+0x10
+0x18
+0x20
+40
+
+分配次序为：
+int double char double int
+
+利用类成员的相对地址确认。
