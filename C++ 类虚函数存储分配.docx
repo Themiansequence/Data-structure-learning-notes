@@ -1,0 +1,30 @@
+# Data-structure-learning-notes
+c++数据结构学习笔记
+class my{
+public:
+	   virtual ~my(){cout<<"my"<<endl;};
+public:
+	int a;
+	double b;
+	char c;
+	double d;
+	int e;
+};
+int main() {
+	printf("%p\n", &my::a);
+	printf("%p\n", &my::b);
+	printf("%p\n", &my::c);
+	printf("%p\n", &my::d);
+	printf("%p\n", &my::e);
+	cout <<sizeof(my)<<endl;
+	return 0;
+}
+0x8
+0x10
+0x18
+0x20
+0x28
+48
+将析构函数改成virtual，即在类中引入虚函数，为了将来的多态应用，编译器在数据成员前增加了一个指针vptr，指向vtbl（表中存放了各个虚函数的地址等信息）。
+
+所以，对象占用的空间除了分配给数据成员，还有编译器根据需要安插进的空间。
